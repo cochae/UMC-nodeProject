@@ -2,7 +2,7 @@
 name: "\U0001F4DDdocs:"
 about: 문서 작업 템플릿입니다.
 title: "\U0001F4DDdocs:"
-labels: ''
+labels: "\U0001F4DDdocumentation"
 assignees: ''
 
 ---

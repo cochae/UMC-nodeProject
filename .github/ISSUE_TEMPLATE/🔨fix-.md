@@ -2,7 +2,7 @@
 name: "\U0001F528fix:"
 about: 버그 수정 템플릿입니다.
 title: "\U0001F528fix:"
-labels: bug
+labels: "\U0001F528fix"
 assignees: ''
 
 ---

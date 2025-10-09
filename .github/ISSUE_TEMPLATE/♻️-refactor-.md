@@ -2,7 +2,7 @@
 name: "♻️ refactor:"
 about: 리팩토링 템플릿입니다.
 title: "♻️ refactor:"
-labels: refactor
+labels: "\U0001F41Bbug"
 assignees: ''
 
 ---
