@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  name           String
+  gender         String
+  birth          DateTime
+  address        String
+  detailAddress  String?
+  phoneNumber    String
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  point Int @default(0)
+
+  reviews        Review[]          // ← 여기가 반대 관계
+  userMissions   UserMission[]     // ← 이거도 반대 관계
+  userFavorCategories UserFavorCategory[]
+}
+
+model FoodCategory {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+
+  userFavorCategories UserFavorCategory[]
+
+  @@map("food_category")
+}
+
+model UserFavorCategory {
+  id             Int          @id @default(autoincrement())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         Int          @map("user_id")
+  foodCategory   FoodCategory @relation(fields: [foodCategoryId], references: [id])
+  foodCategoryId Int          @map("food_category_id")
+
+  @@index([foodCategoryId], map: "f_category_id")
+  @@index([userId], map: "user_id")
+  @@map("user_favor_category")
+}
+model Mission {
+  id          Int     @id @default(autoincrement())
+  storeId     Int?    @map("store_id")
+  reward      Int?
+  deadline    DateTime?
+  missionSpec String?    @map("mission_spec")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  store       Store?     @relation(fields: [storeId], references: [id])
+  userMissions UserMission[]
+
+  @@index([storeId])
+  @@map("mission")
+}
+
+model Region {
+  id        Int   @id @default(autoincrement())
+  name      String?  @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  stores    Store[]
+
+  @@map("region")
+}
+
+model Store {
+  id             Int       @id @default(autoincrement())
+  regionId       Int?      @map("region_id")
+  name           String?      @db.VarChar(50)
+  address        String?      @db.VarChar(50)
+  score          Float?       @default(0)
+  businessNumber String       @map("business_number") @unique
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  region         Region?      @relation(fields: [regionId], references: [id])
+  reviews        Review[]
+  missions       Mission[]
+
+  @@index([regionId])
+  @@map("store")
+}
+
+model Review {
+  id        Int   @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  storeId   Int?  @map("store_id")
+  body      String?  @db.Text
+  score     Float?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+  store     Store?   @relation(fields: [storeId], references: [id])
+
+  @@index([userId])
+  @@index([storeId])
+  @@map("review")
+}
+
+model Terms {
+  id        Int   @id @default(autoincrement())
+  title     String?  @db.VarChar(20)
+  body      String?  @db.Text
+  optional  Boolean? @db.TinyInt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("terms")
+}
+
+model UserMission {
+  id        Int   @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  missionId Int?  @map("mission_id")
+  status    String?  @db.VarChar(15)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+  mission   Mission? @relation(fields: [missionId], references: [id])
+
+  @@index([userId])
+  @@index([missionId])
+  @@map("user_mission")
+}
