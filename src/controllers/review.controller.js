@@ -13,14 +13,12 @@ export const handleReviewCreate = async (req, res, next) => {
     };
 
     const review = await reviewCreate(bodyToReview(entireReviewData));
-    res.status(StatusCodes.OK).json({ result: review });
+    res.status(StatusCodes.OK).success(review);
 }
 export const handleListStoreReviews = async (req, res, next) => {
   const reviews = await listStoreReviews(
     parseInt(req.params.storeId),
     typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0
   );
-  res.status(200).json({
-    result: reviews
-  });
+    res.status(StatusCodes.OK).success(reviews);
 };

@@ -3,6 +3,7 @@ import {
   addMission, addChallenge,
   getMission, getChallenge, getAllStoreMissions, getAllMyChallenges, findUserMission, updateMissionComplete
 } from "../repositories/mission.repository.js";
+import { MissionAlreadyInProgressError, ChallengeNotFoundError, ChallengeAlreadyCompletedError } from "../errors.js";
 
 export const missionCreate = async (data) => {
   const createdMissionId = await addMission(data);
@@ -17,7 +18,7 @@ export const challengeCreate = async (data) => {
   const createdChallengeId = await addChallenge(data);
   
     if (createdChallengeId === null) {
-        throw new Error("이미 진행중인 미션입니다.");
+        throw new MissionAlreadyInProgressError("이미 진행중인 미션입니다", data);
     }
 
   const challenge = await getChallenge(createdChallengeId);
@@ -35,22 +36,18 @@ export const listMyChallenges = async (userId, cursor) => {
 };
 
 
-export const challengeComplete = async ({ userId, missionId }) => {
-  // 1. 존재 여부 확인
-  const userMission = await findUserMission({ userId, missionId });
+export const challengeComplete = async (data) => {
+  const userMission = await findUserMission(data);
 
   if (!userMission) {
-    throw new Error("해당 미션에 대한 도전이 존재하지 않습니다.");
+    throw new ChallengeNotFoundError("해당 미션에 대한 도전이 존재하지 않습니다.", data);
   }
 
-  // 2. 이미 완료된 미션인지 확인
   if (userMission.status === "completed") {
-    throw new Error("이미 완료된 미션입니다.");
+    throw new ChallengeAlreadyCompletedError("이미 완료된 미션입니다.", data);
   }
 
-  // 3. 완료 처리
   const CompletedChallenge = await updateMissionComplete(userMission.id);
 
-  // 4. 응답 포맷 변환
   return responseFromChallenge(CompletedChallenge);
 };

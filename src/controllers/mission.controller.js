@@ -14,11 +14,11 @@ export const handleMissionCreate = async (req, res, next) => {
     console.log("entireMissionData:", entireMissionData);
 
     const mission = await missionCreate(bodyToMission(entireMissionData));
-    res.status(StatusCodes.OK).json({ result: mission });
+    res.status(StatusCodes.OK).success(mission);
 }
 
 export const handleChallengeCreate = async (req, res, next) => {
-    const mission_id = req.params.missionId;
+    const mission_id = Number(req.params.missionId);
     console.log("진행 중인 미션을 추가했습니다!");
     console.log("body:", req.body);
     const entireChallengeData = {
@@ -27,16 +27,14 @@ export const handleChallengeCreate = async (req, res, next) => {
     };
 
     const challenge = await challengeCreate(bodyToChallenge(entireChallengeData));
-    res.status(StatusCodes.OK).json({ result: challenge });
+    res.status(StatusCodes.OK).success(challenge);
 }
 export const handleListStoreMissions = async (req, res, next) => {
   const missions = await listStoreMissions(
     parseInt(req.params.storeId),
     typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0
   );
-  res.status(200).json({
-    result: missions
-  });
+      res.status(StatusCodes.OK).success(missions);
 };
 //내가 진행 중인 미션 목록
 export const handleListMyChallenges = async (req, res, next) => {
@@ -44,14 +42,12 @@ export const handleListMyChallenges = async (req, res, next) => {
     parseInt(req.params.userId),
     typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0
   );
-  res.status(200).json({
-    result: challenges
-  });
+      res.status(StatusCodes.OK).success(challenges);
 };
 
 export const handleChallengeComplete = async (req, res, next ) => {
-    const mission_id = req.params.missionId;
-    const user_id = req.params.userId;
+    const mission_id = Number(req.params.missionId);
+    const user_id = Number(req.params.userId);
 
     const entireCompletedChallengeData = {
         mission_id,
@@ -59,5 +55,5 @@ export const handleChallengeComplete = async (req, res, next ) => {
     };
 
     const completedChallenge = await challengeComplete(bodyToChallenge(entireCompletedChallengeData));
-    res.status(StatusCodes.OK).json({ result: completedChallenge });
+    res.status(StatusCodes.OK).success(completedChallenge);
 }

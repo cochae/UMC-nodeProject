@@ -1,25 +1,31 @@
 import { prisma } from "../db.config.js";
 
 // User 데이터 삽입
-export const addUser = async (data) => {
-  const user = await prisma.user.findFirst({ where: { email: data.email } });
+export const addUser = async (data, prismaTx) => {
+  const db = prismaTx ?? prisma; // 트랜잭션이 있으면 사용, 없으면 기본 prisma
+
+  const user = await db.user.findFirst({ where: { email: data.email } });
   if (user) {
     return null;
   }
 
-  const created= await prisma.user.create({ data: data});
+  const created = await db.user.create({ data: data });
   return created.id;
 };
 
 // 사용자 정보 얻기
-export const getUser = async (userId) => {
-  const user = await prisma.user.findFirstOrThrow({ where: { id: userId } });
+export const getUser = async (userId, prismaTx) => {
+  const db = prismaTx ?? prisma;
+
+  const user = await db.user.findFirstOrThrow({ where: { id: userId } });
   return user;
 };
 
 // 음식 선호 카테고리 매핑
-export const setPreference = async (userId, foodCategoryId) => {
-  await prisma.userFavorCategory.create({
+export const setPreference = async (userId, foodCategoryId, prismaTx) => {
+  const db = prismaTx ?? prisma;
+
+  await db.userFavorCategory.create({
     data: {
       userId: userId,
       foodCategoryId: foodCategoryId,
@@ -28,8 +34,10 @@ export const setPreference = async (userId, foodCategoryId) => {
 };
 
 // 사용자 선호 카테고리 반환
-export const getUserPreferencesByUserId = async (userId) => {
-  const preferences = await prisma.userFavorCategory.findMany({
+export const getUserPreferencesByUserId = async (userId, prismaTx) => {
+  const db = prismaTx ?? prisma;
+
+  const preferences = await db.userFavorCategory.findMany({
     select: {
       id: true,
       userId: true,
@@ -42,8 +50,12 @@ export const getUserPreferencesByUserId = async (userId) => {
 
   return preferences;
 };
-export const getAllMyReviews = async (userId, cursor) => {
-  const reviews = await prisma.review.findMany({
+
+// 내 리뷰 조회
+export const getAllMyReviews = async (userId, cursor, prismaTx) => {
+  const db = prismaTx ?? prisma;
+
+  const reviews = await db.review.findMany({
     select: {
       id: true,
       body: true,
