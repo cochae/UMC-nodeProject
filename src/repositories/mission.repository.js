@@ -1,4 +1,5 @@
 import { prisma } from "../db.config.js";
+import { NoExistsStoreError } from "../errors.js";
 
 export const addMission = async (data) => {
   try {
@@ -25,7 +26,7 @@ export const addChallenge = async (data) => {
     const isExistChallenge = await prisma.userMission.findFirst({
       where: { 
         userId: 19,           // ← 추가
-        missionId: data.mission_id, 
+        missionId: data.missionId, 
       }
     });
 
@@ -35,7 +36,7 @@ export const addChallenge = async (data) => {
 
     const newUserMission = await prisma.userMission.create({
       data: {
-        missionId: data.mission_id,
+        missionId: data.missionId,
         userId: 19,
         status: "in_progress"
       }
@@ -93,6 +94,14 @@ export const getChallenge = async (challengeId) => {
 };
 
 export const getAllStoreMissions = async (storeId, cursor) => {
+
+  const store = await prisma.store.findUnique({
+      where: { id: storeId },
+    });
+    if(store===null){
+      throw new NoExistsStoreError("미션 목록을 불러올 가게가 존재하지 않습니다");
+    }
+
   const missions = await prisma.mission.findMany({
     select: { id: true, storeId: true, deadline: true, missionSpec: true, storeId: true },
     where: { storeId: storeId, id: { gt: cursor } },

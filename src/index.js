@@ -7,6 +7,8 @@ import { handleUserSignUp, handleListMyReviews } from "./controllers/user.contro
 import { handleStoreCreate } from "./controllers/store.controller.js";
 import { handleReviewCreate, handleListStoreReviews } from "./controllers/review.controller.js";
 import { handleListStoreMissions, handleMissionCreate, handleChallengeCreate, handleListMyChallenges, handleChallengeComplete } from "./controllers/mission.controller.js";
+import swaggerAutogen from "swagger-autogen";
+import swaggerUiExpress from "swagger-ui-express";
 
 dotenv.config();
 
@@ -33,6 +35,36 @@ app.use((req, res, next) => {
   };
 
   next();
+});
+app.use(
+  "/docs",
+  swaggerUiExpress.serve,
+  swaggerUiExpress.setup({}, {
+    swaggerOptions: {
+      url: "/openapi.json",
+    },
+  })
+);
+
+app.get("/openapi.json", async (req, res, next) => {
+  // #swagger.ignore = true
+  const options = {
+    openapi: "3.0.0",
+    disableLogs: true,
+    writeOutputFile: false,
+  };
+  const outputFile = "/dev/null"; // 파일 출력은 사용하지 않습니다.
+  const routes = ["./src/index.js"];
+  const doc = {
+    info: {
+      title: "UMC 9th",
+      description: "UMC 9th Node.js 테스트 프로젝트입니다.",
+    },
+    host: "localhost:3000",
+  };
+
+  const result = await swaggerAutogen(options)(outputFile, routes, doc);
+  res.json(result ? result.data : null);
 });
 
 app.use(cors()); // cors 방식 허용
@@ -62,7 +94,7 @@ app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions);
 //내가 진행 중인 미션 목록
 app.get("/api/v1/missions/me/:userId/challenges", handleListMyChallenges)
 //미션완료처리
-app.patch("/api/v1/missions/:missionId/challenges/:userId", handleChallengeComplete);
+app.patch("/api/v1/missions/:missionId/complete/:userId", handleChallengeComplete);
 /**
  * 전역 오류를 처리하기 위한 미들웨어
  */

@@ -1,4 +1,5 @@
 import { prisma } from "../db.config.js";
+import { NoExistsStoreError } from "../errors.js";
 
 export const addReview = async (data) => {
   try {
@@ -77,6 +78,12 @@ export const getReview = async (reviewId) => {
 };
 
 export const getAllStoreReviews = async (storeId, cursor) => {
+  const store = await prisma.store.findUnique({
+    where: { id: storeId },
+  });
+  if(store===null){
+    throw new NoExistsStoreError("리뷰를 불러올 가게가 존재하지 않습니다");
+  }
   const reviews = await prisma.review.findMany({
     select: { id: true, body: true, storeId: true, userId: true },
     where: { storeId: storeId, id: { gt: cursor } },

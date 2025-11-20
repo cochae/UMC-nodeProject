@@ -1,11 +1,19 @@
+import { prisma } from "../db.config.js";
 import { responseFromMissions, responseFromMission, responseFromChallenge } from "../dtos/mission.dto.js";
 import {
   addMission, addChallenge,
   getMission, getChallenge, getAllStoreMissions, getAllMyChallenges, findUserMission, updateMissionComplete
 } from "../repositories/mission.repository.js";
-import { MissionAlreadyInProgressError, ChallengeNotFoundError, ChallengeAlreadyCompletedError } from "../errors.js";
+import { MissionAlreadyInProgressError, ChallengeNotFoundError, ChallengeAlreadyCompletedError, NoExistsStoreError } from "../errors.js";
 
 export const missionCreate = async (data) => {
+  const store = await prisma.store.findUnique({
+    where: { id: data.store_id },
+  });
+
+  if(store === null){
+    throw new NoExistsStoreError("해당 가게가 존재하지 않습니다.");
+  }
   const createdMissionId = await addMission(data);
 
   const mission = await getMission(createdMissionId);
