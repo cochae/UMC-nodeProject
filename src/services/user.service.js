@@ -8,7 +8,8 @@ import {
   getUser,
   getUserPreferencesByUserId,
   setPreference,
-  getAllMyReviews
+  getAllMyReviews,
+  updateUser
 } from "../repositories/user.repository.js";
 
 export const userSignUp = async (data) => {
@@ -48,4 +49,31 @@ export const userSignUp = async (data) => {
 export const listMyReviews = async (userId, cursor) => {
   const reviews = await getAllMyReviews(userId, cursor);
   return responseFromReviews(reviews);
+};
+
+//여기서부터 수정
+export const updateUserInfo = async (data) => {
+  return await prisma.$transaction(async (prismaTx) => {
+  
+    const updateUserId = await updateUser(
+      {
+        userId: data.userId,
+        gender: data.gender,
+        birth: data.birth,
+        address: data.address,
+        detailAddress: data.detailAddress,
+        phoneNumber: data.phoneNumber,
+      },
+      prismaTx // 트랜잭션 전달
+    );
+
+    for (const preference of data.preferences) {
+      await setPreference(updateUserId, preference, prismaTx);
+    }
+
+    const user = await getUser(updateUserId, prismaTx);
+    const preferences = await getUserPreferencesByUserId(updateUserId, prismaTx);
+
+    return responseFromUser({ user, preferences });
+  });
 };

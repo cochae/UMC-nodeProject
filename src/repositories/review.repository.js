@@ -4,7 +4,7 @@ import { NoExistsStoreError } from "../errors.js";
 export const addReview = async (data) => {
   try {
     // 1. 타입 변환 (store_id 사용!)
-    const storeId = parseInt(data.store_id);
+    const storeId = parseInt(data.storeId);
 
     // 2. 가게 존재 여부 검증
     const existingStore = await prisma.store.findUnique({
@@ -18,7 +18,7 @@ export const addReview = async (data) => {
     // 3. review 생성
     const newReview = await prisma.review.create({
       data: {
-        userId: 19,
+        userId: data.userId,
         storeId: storeId,
         body: data.body,
         score: data.score,

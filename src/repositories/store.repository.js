@@ -4,7 +4,7 @@ export const addStore = async (data) => {
 
   try {
     const existingStore = await prisma.store.findUnique({
-      where: {businessNumber: data.business_number}
+      where: {businessNumber: data.businessNumber}
     });
 
     if (existingStore) {
@@ -12,17 +12,17 @@ export const addStore = async (data) => {
     }
 
     const region = await prisma.region.findFirst({
-      where: { name: data.region_name}
+      where: { name: data.regionName}
     })
 
     if (!region){
-      throw new Error(`지역을 찾을 수 없습니다: ${data.region_name}`);
+      throw new Error(`지역을 찾을 수 없습니다: ${data.regionName}`);
     }
 
     // store 생성
     const newStore = await prisma.store.create({
       data: {
-        businessNumber: data.business_number,
+        businessNumber: data.businessNumber,
         regionId: region.id,
         name: data.name,
         address: data.address,

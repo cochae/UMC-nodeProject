@@ -24,6 +24,7 @@ model User {
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
   point Int @default(0)
+  role String?
 
   reviews        Review[]          // ← 여기가 반대 관계
   userMissions   UserMission[]     // ← 이거도 반대 관계

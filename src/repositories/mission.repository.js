@@ -25,7 +25,7 @@ export const addChallenge = async (data) => {
   try {
     const isExistChallenge = await prisma.userMission.findFirst({
       where: { 
-        userId: 19,           // ← 추가
+        userId: data.userId,           // ← 추가
         missionId: data.missionId, 
       }
     });
@@ -37,7 +37,7 @@ export const addChallenge = async (data) => {
     const newUserMission = await prisma.userMission.create({
       data: {
         missionId: data.missionId,
-        userId: 19,
+        userId: data.userId,
         status: "in_progress"
       }
     });
@@ -125,6 +125,7 @@ export const getAllMyChallenges = async (userId, cursor) => {
       id: true,          // UserMission id
       mission: {         // relation 통해 Mission 정보 가져오기
         select: {
+          id: true,
           storeId: true,
           deadline: true,
           missionSpec: true,

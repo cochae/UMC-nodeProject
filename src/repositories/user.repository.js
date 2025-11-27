@@ -13,6 +13,28 @@ export const addUser = async (data, prismaTx) => {
   return created.id;
 };
 
+// User 데이터 수정
+export const updateUser = async (data, prismaTx) => {
+  const db = prismaTx ?? prisma; // 트랜잭션이 있으면 사용, 없으면 기본 prisma
+
+  if (!data.userId) return null; // userId 없으면 수정 불가
+
+  // 사용자 조회
+  const user = await db.user.findUnique({ where: { id: data.userId } });
+  if (!user) return null; // 수정할 사용자가 없으면 null 반환
+
+  // userId 제외하고 업데이트
+  const { userId, ...updateData } = data;
+
+  const updated = await db.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  return updated.id;
+};
+
+
 // 사용자 정보 얻기
 export const getUser = async (userId, prismaTx) => {
   const db = prismaTx ?? prisma;

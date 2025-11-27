@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser } from "../dtos/user.dto.js";
-import { userSignUp, listMyReviews } from "../services/user.service.js";
+import { userSignUp, listMyReviews, updateUserInfo } from "../services/user.service.js";
 
 export const handleUserSignUp = async (req, res, next) => {
   /*
@@ -127,7 +127,83 @@ export const handleListMyReviews = async (req, res, next) => {
     };
   */
   const reviews = await listMyReviews(
-  parseInt(req.params.userId),
-  typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0  );
+    req.user.id,
+    typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0  
+  );
   res.status(StatusCodes.OK).success(reviews);
+};
+export const handleMyInfo = async (req, res, next) => {
+  /*
+    #swagger.summary = '정보 수정 API';
+    #swagger.requestBody = {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              gender: { type: "string" },
+              birth: { type: "string", format: "date" },
+              address: { type: "string" },
+              detailAddress: { type: "string" },
+              phoneNumber: { type: "string" },
+              preferences: { type: "array", items: { type: "number" } }
+            }
+          }
+        }
+      }
+    };
+    #swagger.responses[200] = {
+      description: "정보 수정 성공 응답",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              resultType: { type: "string", example: "SUCCESS" },
+              error: { type: "object", nullable: true, example: null },
+              success: {
+                type: "object",
+                properties: {
+                  email: { type: "string" },
+                  name: { type: "string" },
+                  preferCategory: { type: "array", items: { type: "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    #swagger.responses[400] = {
+      description: "정보 수정 실패 응답",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              resultType: { type: "string", example: "FAIL" },
+              error: {
+                type: "object",
+                properties: {
+                  errorCode: { type: "string", example: "U001" },
+                  reason: { type: "string" },
+                  data: { type: "object" }
+                }
+              },
+              success: { type: "object", nullable: true, example: null }
+            }
+          }
+        }
+      }
+    };
+  */
+
+const user = await updateUserInfo(bodyToUser({
+  ...req.body,
+  userId: req.user.id,  // 로그인한 사용자 ID 추가
+}));
+
+  res.status(StatusCodes.OK).success(user);
+
 };

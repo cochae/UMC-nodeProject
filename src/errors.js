@@ -70,4 +70,12 @@ export class ScoreOutOfRangeError extends Error {
     this.data = data;
   }
 }
+export class UnauthorizedRoleError extends Error {
+  errorCode = "U009";
 
+  constructor(reason, data) {
+    super(reason);
+    this.reason = reason;
+    this.data = data;
+  }
+}

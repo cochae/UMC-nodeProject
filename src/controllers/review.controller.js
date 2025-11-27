@@ -65,12 +65,13 @@ export const handleReviewCreate = async (req, res, next) => {
       }
     };
   */
-    const store_id = req.params.storeId;
+    const storeId = req.params.storeId;
     console.log("리뷰를 추가했습니다!");
     console.log("body:", req.body);
     const entireReviewData = {
         ...req.body,
-        store_id,  // pathvariable
+        storeId,  // pathvariable
+        userId: req.user.id
     };
 
     const review = await reviewCreate(bodyToReview(entireReviewData));

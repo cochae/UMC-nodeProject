@@ -3,6 +3,7 @@ import { bodyToStore } from "../dtos/store.dto.js";
 import { storeCreate } from "../services/store.service.js";
 
 export const handleStoreCreate = async (req, res, next) => {
+   console.log("req.user:", req.user);
       /*
     #swagger.summary = '가게 추가 API';
     #swagger.requestBody = {
@@ -65,9 +66,7 @@ export const handleStoreCreate = async (req, res, next) => {
       }
     };
   */
-    console.log("가게를 추가했습니다!");
-    console.log("body:", req.body);
 
-    const store = await storeCreate(bodyToStore(req.body));
+    const store = await storeCreate(req.body, req.user.role);
     res.status(StatusCodes.OK).success(store);
 }

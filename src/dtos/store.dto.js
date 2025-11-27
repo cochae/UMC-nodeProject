@@ -6,7 +6,8 @@ export const bodyToStore = (body) => {
     name: body.name, 
     score: body.score, 
     address: body.address,
-    business_number: body.business_number
+    business_number: body.business_number,
+    userId: userId
   };
 };
 

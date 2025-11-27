@@ -12,8 +12,8 @@ export const bodyToMission = (body) => {
 export const bodyToChallenge = (body) => {
 
     return {
-        missionId: body.mission_id, 
-        userId: body.user_id
+        missionId: body.missionId, 
+        userId: body.userId
     };
 };
 

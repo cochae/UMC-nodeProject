@@ -2,15 +2,21 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import cookieParser from "cookie-parser";
+import passport from "passport";
 import morgan from "morgan";
-import { handleUserSignUp, handleListMyReviews } from "./controllers/user.controller.js";
+import { handleUserSignUp, handleListMyReviews, handleMyInfo } from "./controllers/user.controller.js";
 import { handleStoreCreate } from "./controllers/store.controller.js";
 import { handleReviewCreate, handleListStoreReviews } from "./controllers/review.controller.js";
 import { handleListStoreMissions, handleMissionCreate, handleChallengeCreate, handleListMyChallenges, handleChallengeComplete } from "./controllers/mission.controller.js";
 import swaggerAutogen from "swagger-autogen";
 import swaggerUiExpress from "swagger-ui-express";
+import { googleStrategy, jwtStrategy } from "./auth.config.js";
+
 
 dotenv.config();
+passport.use(googleStrategy);
+passport.use(googleStrategy);
+passport.use(jwtStrategy); 
 
 const app = express();
 const port = process.env.PORT;
@@ -71,30 +77,74 @@ app.use(cors()); // cors 방식 허용
 app.use(express.static("public")); // 정적 파일 접근
 app.use(express.json()); // request의 본문을 json으로 해석할 수 있도록 함 (JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
+app.use(passport.initialize());
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+const isLogin = passport.authenticate('jwt', { session: false });
+
+
 //회원가입
 app.post("/api/v1/users/signup", handleUserSignUp);
 //가게생성
-app.post("/api/v1/stores", handleStoreCreate);
+app.post("/api/v1/stores", isLogin, handleStoreCreate);
 //리뷰 추가
-app.post("/api/v1/stores/:storeId/reviews", handleReviewCreate);
+app.post("/api/v1/stores/:storeId/reviews", isLogin, handleReviewCreate);
 //미션생성
-app.post("/api/v1/stores/:storeId/missions", handleMissionCreate);
+app.post("/api/v1/stores/:storeId/missions", isLogin, handleMissionCreate);
 //미션도전
-app.post("/api/v1/missions/:missionId/challenge", handleChallengeCreate);
+app.post("/api/v1/missions/:missionId/challenge", isLogin, handleChallengeCreate);
 //가게의 모든 리뷰
 app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
-//내가 작성한 리뷰 목록
-app.get("/api/v1/users/me/:userId/reviews", handleListMyReviews);
+// 내가 작성한 리뷰 목록
+app.get("/api/v1/users/me/reviews", isLogin, handleListMyReviews);
 //특정 가게의 미션 목록
 app.get("/api/v1/stores/:storeId/missions", handleListStoreMissions);
-//내가 진행 중인 미션 목록
-app.get("/api/v1/missions/me/:userId/challenges", handleListMyChallenges)
-//미션완료처리
-app.patch("/api/v1/missions/:missionId/complete/:userId", handleChallengeComplete);
+// 내가 진행 중인 미션 목록
+app.get("/api/v1/missions/me/challenges", isLogin, handleListMyChallenges);
+// 미션 완료 처리
+app.patch("/api/v1/missions/:missionId/complete", isLogin, handleChallengeComplete);
+// 정보 수정
+app.patch("/api/v1/users/me", isLogin, handleMyInfo);
+
+
+
+app.get('/mypage', isLogin, (req, res) => {
+  res.status(200).success({
+    message: `인증 성공! ${req.user.name}님의 마이페이지입니다.`,
+    user: req.user,
+  });
+});
+
+
+app.get("/oauth2/login/google", 
+  passport.authenticate("google", { 
+    session: false 
+  })
+);
+app.get(
+  "/oauth2/callback/google",
+  passport.authenticate("google", {
+	  session: false,
+    failureRedirect: "/login-failed",
+  }),
+  (req, res) => {
+    const tokens = req.user; 
+
+    res.status(200).json({
+      resultType: "SUCCESS",
+      error: null,
+      success: {
+          message: "Google 로그인 성공!",
+          tokens: tokens, // { "accessToken": "...", "refreshToken": "..." }
+      }
+    });
+  }
+);
+
+
 /**
  * 전역 오류를 처리하기 위한 미들웨어
  */

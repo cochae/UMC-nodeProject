@@ -140,12 +140,13 @@ export const handleChallengeCreate = async (req, res, next) => {
     };
   */
      
-    const mission_id = Number(req.params.missionId);
+    const missionId = Number(req.params.missionId);
     console.log("진행 중인 미션을 추가했습니다!");
     console.log("body:", req.body);
     const entireChallengeData = {
         ...req.body,
-        mission_id,  // pathvariable
+        missionId,  // pathvariable
+        userId: req.user.id
     };
 
     const challenge = await challengeCreate(bodyToChallenge(entireChallengeData));
@@ -231,7 +232,7 @@ export const handleListMyChallenges = async (req, res, next) => {
     };
   */
   const challenges = await listMyChallenges(
-    parseInt(req.params.userId),
+    req.user.id,
     typeof req.query.cursor === "string" ? parseInt(req.query.cursor) : 0
   );
       res.status(StatusCodes.OK).success(challenges);
@@ -285,12 +286,12 @@ export const handleChallengeComplete = async (req, res, next ) => {
       }
     };
   */
-    const mission_id = Number(req.params.missionId);
-    const user_id = Number(req.params.userId);
+    const missionId = Number(req.params.missionId);
+    const userId = req.user.id;
 
     const entireCompletedChallengeData = {
-        mission_id,
-        user_id
+        missionId,
+        userId
     };
 
     const completedChallenge = await challengeComplete(bodyToChallenge(entireCompletedChallengeData));
